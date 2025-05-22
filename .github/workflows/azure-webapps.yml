@@ -1,0 +1,26 @@
+name: Build & Deploy PHP app to Azure Web App
+
+on:
+  push:
+    branches: [ main, dev ]   # koreguokite, jei reikia
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4                # pasiima jūsų kodą
+
+    # (jei turite composer / npm build – įdėkite čia)
+
+    - name: Zip site                            # supakuojame visą projektą
+      run: zip -r site.zip .
+
+    - name: Deploy to production / staging
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: Julius-StudentApp
+        slot-name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: site.zip
